@@ -1,0 +1,47 @@
+- case: sanity
+  main: |
+    from configur8 import env
+
+    x = env.int("FOO")
+
+    reveal_type(x)  # N: Revealed type is 'builtins.int*'
+
+- case: default
+  main: |
+    from configur8 import env
+
+    x = env.int("FOO", "BAR")
+
+    reveal_type(x)  # N: Revealed type is 'builtins.int*'
+
+- case: bad_default
+  main: |
+    from configur8 import env
+
+    x = env.int("FOO", 2)
+  out: |
+    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Union[Empty, str]"
+
+- case: optional
+  main: |
+    from configur8 import env
+
+    x = env.int.optional("FOO")
+
+    reveal_type(x)  # N: Revealed type is 'Union[builtins.int*, None]'
+
+- case: list
+  main: |
+    from configur8 import env
+
+    x = env.int.list("FOO")
+
+    reveal_type(x)  # N: Revealed type is 'builtins.list[builtins.int*]'
+
+- case: list_optional
+  main: |
+    from configur8 import env
+
+    x = env.int.list_optional("FOO")
+
+    reveal_type(x)  # N: Revealed type is 'Union[builtins.list[builtins.int*], None]'
