@@ -53,16 +53,16 @@ commands:
     steps:
       - checkout
       - restore_cache:
-          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "setup.cfg" }}
+          key: v2-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "setup.cfg" }}
       - run:
           name: install python dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
             pip install --upgrade pip setuptools wheel
-            make dev
+            make local
       - save_cache:
-          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "setup.cfg" }}
+          key: v2-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "setup.cfg" }}
           paths:
             - "venv"
             - "/home/circleci/.cache/pip"
