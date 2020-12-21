@@ -5,12 +5,12 @@ workflows:
   build_and_test:
     jobs:
       - build:
-          context: python-lib
+          context: package
           filters:
             tags:
               only: /.*/
       - publish:
-          context: python-lib
+          context: publish
           requires:
             - build
           filters:
