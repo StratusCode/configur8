@@ -20,7 +20,7 @@
 
     x = env.bool("FOO", 2)
   out: |
-    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Union[Empty, str]"
+    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Union[Empty, str, bool]"
 
 - case: optional
   main: |

@@ -20,7 +20,7 @@
 
     x = env.url("FOO", 2)
   out: |
-    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Union[Empty, str]"
+    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Union[Empty, str, Url]"
 
 - case: optional
   main: |

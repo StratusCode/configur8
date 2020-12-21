@@ -18,9 +18,9 @@
   main: |
     from configur8 import env
 
-    x = env.float("FOO", 2)
+    x = env.float("FOO", [1])
   out: |
-    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Union[Empty, str]"
+    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "List[int]"; expected "Union[Empty, str, float]"
 
 - case: optional
   main: |

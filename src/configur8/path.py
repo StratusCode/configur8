@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 __all__ = (
     "parse",
@@ -53,5 +53,8 @@ class Path:
         return self.open().readlines()
 
 
-def parse(path: str) -> Path:
+def parse(path: Union[str, Path]) -> Path:
+    if isinstance(path, Path):
+        return path
+
     return Path(path)

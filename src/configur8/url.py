@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union
 from urllib.parse import urlparse, ParseResult, parse_qs
 
 __all__ = (
@@ -94,5 +94,8 @@ class Url:
         return self.result.fragment
 
 
-def parse(data: str) -> Url:
+def parse(data: Union[str, Url]) -> Url:
+    if isinstance(data, Url):
+        return data
+
     return Url(urlparse(data))

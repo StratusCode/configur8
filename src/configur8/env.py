@@ -26,7 +26,10 @@ Everything is designed to be type safe.
 
 import builtins
 import os
-from typing import Callable, Generic, Optional, List, Union, TypeVar
+from typing import (
+    Callable, Generic, Optional, List, Union, TypeVar, TYPE_CHECKING
+)
+
 
 from .util import MISSING, Empty
 from .core import InvalidConfig
@@ -67,31 +70,39 @@ def get_raw_optional(env_var: builtins.str) -> Optional[builtins.str]:
 
 
 class EnvVar(Generic[T]):
-    def __init__(self, parse_func: Callable[[builtins.str], T]):
+    def __init__(self, parse_func: Callable[[Union[builtins.str, T]], T]):
         self.parse_func = parse_func
 
     def default(
         self,
         env_var_name: builtins.str,
-        default: Union[Empty, builtins.str] = MISSING,
-    ) -> builtins.str:
+        default: Union[Empty, builtins.str, T, List[T]] = MISSING,
+    ) -> Union[builtins.str, T, List[T]]:
         if default is MISSING:
             return get_raw(env_var_name)
+
+        if TYPE_CHECKING:
+            assert not isinstance(default, Empty)
 
         raw_value = get_raw_optional(env_var_name)
 
         if raw_value is None:
-            raw_value = default
+            return default
 
         return raw_value
 
     def __call__(
         self,
         env_var_name: builtins.str,
-        default: Union[Empty, builtins.str] = MISSING,
-        **kwargs,
+        default: Union[Empty, builtins.str, T] = MISSING,
     ) -> T:
-        return self.parse_func(self.default(env_var_name, default))
+        raw_value = self.default(env_var_name, default)
+
+        if TYPE_CHECKING:
+            assert not isinstance(raw_value, Empty)
+            assert not isinstance(raw_value, list)
+
+        return self.parse_func(raw_value)
 
     def optional(self, env_var_name: builtins.str) -> Optional[T]:
         raw_value = get_raw_optional(env_var_name)
@@ -104,10 +115,17 @@ class EnvVar(Generic[T]):
     def list(
         self,
         env_var_name: builtins.str,
-        default: Union[Empty, builtins.str] = MISSING,
+        default: Union[Empty, builtins.str, List[T]] = MISSING,
         separator=LIST_SEPARATOR,
     ) -> List[T]:
         raw_value = self.default(env_var_name, default)
+
+        if isinstance(raw_value, list):
+            return raw_value  # type: ignore
+
+        if TYPE_CHECKING:
+            assert not isinstance(raw_value, Empty)
+            assert isinstance(raw_value, builtins.str)
 
         return [self.parse_func(item) for item in raw_value.split(separator)]
 
@@ -128,18 +146,26 @@ def parse_str(raw_value: builtins.str) -> builtins.str:
     return raw_value
 
 
-def parse_bool(raw_value: builtins.str) -> builtins.bool:
+def parse_bool(raw_value: Union[builtins.str, builtins.bool]) -> builtins.bool:
+    if isinstance(raw_value, builtins.bool):
+        return raw_value
+
     return raw_value in BOOLEAN_TRUTHY_VALUES
 
 
-def parse_int(raw_value: builtins.str) -> builtins.int:
+def parse_int(raw_value: Union[builtins.str, builtins.int]) -> builtins.int:
+    if isinstance(raw_value, builtins.int):
+        return raw_value
+
     try:
         return builtins.int(raw_value)
     except ValueError:
         raise InvalidConfig(f"{raw_value!r} is not a valid integer")
 
 
-def parse_float(raw_value: builtins.str) -> builtins.float:
+def parse_float(
+    raw_value: Union[builtins.str, builtins.float],
+) -> builtins.float:
     try:
         return builtins.float(raw_value)
     except ValueError:
