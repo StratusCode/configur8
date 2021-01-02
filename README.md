@@ -38,7 +38,7 @@ Everything is designed to be type safe.
 * Boolean - ``env.bool``
 * Url - ``env.url``
 * Path - ``env.path``
-
+* Email - ``env.email`` - Validation provided by ``email-validator``
 Each type can support optional values and work with lists:
 
 ```python
