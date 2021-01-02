@@ -29,6 +29,9 @@ def my_env():
 
         "CFG_PATH": "/var/run/secrets/foo/baz.key",
         "CFG_PATH_LIST": "/usr/bin,/usr/local/bin",
+
+        "EMAIL": "foo@bar.com",
+        "EMAIL_LIST": "foo@bar.com,me@example.com",
     }
 
     os.environ.update(data)

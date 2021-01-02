@@ -31,7 +31,7 @@ class Path:
         buffering=-1,
         encoding=None,
         errors=None,
-        newline=None
+        newline=None,
     ):
         """
         See https://docs.python.org/3/library/functions.html#open for arg

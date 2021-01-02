@@ -35,6 +35,7 @@ from .util import MISSING, Empty
 from .core import InvalidConfig
 from .url import Url, parse as parse_url
 from .path import Path, parse as parse_path
+from .email import parse as parse_email
 
 __all__ = (
     "MissingFromEnv",
@@ -178,3 +179,4 @@ int = EnvVar[builtins.int](parse_int)
 float = EnvVar[builtins.float](parse_float)
 url = EnvVar[Url](parse_url)
 path = EnvVar[Path](parse_path)
+email = EnvVar[builtins.str](parse_email)
