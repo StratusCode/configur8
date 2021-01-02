@@ -45,6 +45,7 @@ __all__ = (
     "float",
     "url",
     "path",
+    "email",
 )
 
 T = TypeVar("T")
