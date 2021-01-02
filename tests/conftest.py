@@ -3,7 +3,7 @@ import os
 from pytest import fixture
 
 __all__ = (
-    "my_env"
+    "my_env",
 )
 
 
