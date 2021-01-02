@@ -14,8 +14,8 @@ An example:
 from configur8 import env
 
 SECRET_KEY = env.str("SECRET_KEY")
-NUM_WORKERS = env.int("NUM_WORKERS", "2")
-DEBUG = env.bool("DEBUG", "false")
+NUM_WORKERS = env.int("NUM_WORKERS", 2)
+DEBUG = env.bool("DEBUG", False)
 ```
 
 In the example above:
