@@ -93,6 +93,10 @@ class Url:
 
         return self.result.fragment
 
+    # support the str methods
+    def __getattr__(self, name):
+        return getattr(str(self), name)
+
 
 def parse(data: Union[str, Url]) -> Url:
     if isinstance(data, Url):

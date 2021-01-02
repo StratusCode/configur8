@@ -115,3 +115,17 @@ def test_list_optional_separator(my_env):
         "http://foo",
         "http://bar",
     ]
+
+
+def test_str_protocol(my_env):
+    """
+    """
+    os.environ["MY_VAR"] = "http://localhost"
+
+    value = env.url("MY_VAR")
+
+    assert hasattr(value, "rstrip")
+    assert hasattr(value, "lstrip")
+    assert hasattr(value, "replace")
+    assert hasattr(value, "upper")
+    assert hasattr(value, "lower")
