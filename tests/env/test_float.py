@@ -1,8 +1,8 @@
 import os
 
 import pytest
-
-from configur8 import env, InvalidConfig
+from configur8 import env
+from configur8 import InvalidConfig
 
 
 def test_sanity(my_env):

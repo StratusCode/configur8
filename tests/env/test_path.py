@@ -2,7 +2,6 @@ import os
 import tempfile
 
 import pytest
-
 from configur8 import env
 
 
@@ -126,7 +125,7 @@ def test_read(my_env):
 
         x = env.path("MY_VAR")
 
-        x.read() == "hello world"
+        assert x.read() == "hello world"
 
 
 def test_readlines(my_env):
@@ -140,4 +139,4 @@ def test_readlines(my_env):
 
         x = env.path("MY_VAR")
 
-        x.readlines() == ["hello", "world"]
+        assert x.readlines() == ["hello\n", "world"]

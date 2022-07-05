@@ -1,6 +1,4 @@
-__all__ = (
-    "InvalidConfig",
-)
+__all__ = ("InvalidConfig",)
 
 
 class InvalidConfig(Exception):

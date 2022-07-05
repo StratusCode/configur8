@@ -4,7 +4,7 @@
 
     x = env.str("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'builtins.str*'
+    reveal_type(x)  # N: Revealed type is "builtins.str"
 
 - case: default
   main: |
@@ -12,7 +12,7 @@
 
     x = env.str("FOO", "BAR")
 
-    reveal_type(x)  # N: Revealed type is 'builtins.str*'
+    reveal_type(x)  # N: Revealed type is "builtins.str"
 
 - case: bad_default
   main: |
@@ -28,7 +28,7 @@
 
     x = env.str.optional("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'Union[builtins.str*, None]'
+    reveal_type(x)  # N: Revealed type is "Union[builtins.str, None]"
 
 - case: list
   main: |
@@ -36,7 +36,7 @@
 
     x = env.str.list("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'builtins.list[builtins.str*]'
+    reveal_type(x)  # N: Revealed type is "builtins.list[builtins.str]"
 
 - case: list_optional
   main: |
@@ -44,4 +44,4 @@
 
     x = env.str.list_optional("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'Union[builtins.list[builtins.str*], None]'
+    reveal_type(x)  # N: Revealed type is "Union[builtins.list[builtins.str], None]"

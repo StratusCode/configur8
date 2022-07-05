@@ -1,4 +1,5 @@
-from configur8.url import Url, parse
+from configur8.url import parse
+from configur8.url import Url
 
 
 def test_sanity():
@@ -6,8 +7,12 @@ def test_sanity():
 
     assert isinstance(result, Url)
 
-    assert result == "https://admin:password@localhost:9090/foo?hello=world#bar"  # noqa: E501
-    assert "https://admin:password@localhost:9090/foo?hello=world#bar" == result  # noqa: E501
+    assert (
+        result == "https://admin:password@localhost:9090/foo?hello=world#bar"
+    )  # noqa: E501
+    assert (
+        "https://admin:password@localhost:9090/foo?hello=world#bar" == result
+    )  # noqa: E501
     assert result.protocol == "https"
     assert result.username == "admin"
     assert result.password == "password"

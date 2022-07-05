@@ -1,7 +1,6 @@
 import os
 
 import pytest
-
 from configur8 import env
 
 
@@ -118,8 +117,7 @@ def test_list_optional_separator(my_env):
 
 
 def test_str_protocol(my_env):
-    """
-    """
+    """ """
     os.environ["MY_VAR"] = "http://localhost"
 
     value = env.url("MY_VAR")

@@ -4,7 +4,7 @@
 
     x = env.url("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'configur8.url.Url*'
+    reveal_type(x)  # N: Revealed type is "configur8.url.Url"
 
 - case: default
   main: |
@@ -12,7 +12,7 @@
 
     x = env.url("FOO", "BAR")
 
-    reveal_type(x)  # N: Revealed type is 'configur8.url.Url*'
+    reveal_type(x)  # N: Revealed type is "configur8.url.Url"
 
 - case: bad_default
   main: |
@@ -28,7 +28,7 @@
 
     x = env.url.optional("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'Union[configur8.url.Url*, None]'
+    reveal_type(x)  # N: Revealed type is "Union[configur8.url.Url, None]"
 
 - case: list
   main: |
@@ -36,7 +36,7 @@
 
     x = env.url.list("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'builtins.list[configur8.url.Url*]'
+    reveal_type(x)  # N: Revealed type is "builtins.list[configur8.url.Url]"
 
 - case: list_optional
   main: |
@@ -44,4 +44,4 @@
 
     x = env.url.list_optional("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'Union[builtins.list[configur8.url.Url*], None]'
+    reveal_type(x)  # N: Revealed type is "Union[builtins.list[configur8.url.Url], None]"

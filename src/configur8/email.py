@@ -1,10 +1,9 @@
-from email_validator import validate_email, EmailNotValidError
+from email_validator import EmailNotValidError
+from email_validator import validate_email
 
 from .core import InvalidConfig
 
-__all__ = (
-    "parse",
-)
+__all__ = ("parse",)
 
 
 def parse(email: str) -> str:

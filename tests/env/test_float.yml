@@ -4,7 +4,7 @@
 
     x = env.float("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'builtins.float*'
+    reveal_type(x)  # N: Revealed type is "builtins.float"
 
 - case: default
   main: |
@@ -12,7 +12,7 @@
 
     x = env.float("FOO", "BAR")
 
-    reveal_type(x)  # N: Revealed type is 'builtins.float*'
+    reveal_type(x)  # N: Revealed type is "builtins.float"
 
 - case: bad_default
   main: |
@@ -28,7 +28,7 @@
 
     x = env.float.optional("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'Union[builtins.float*, None]'
+    reveal_type(x)  # N: Revealed type is "Union[builtins.float, None]"
 
 - case: list
   main: |
@@ -36,7 +36,7 @@
 
     x = env.float.list("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'builtins.list[builtins.float*]'
+    reveal_type(x)  # N: Revealed type is "builtins.list[builtins.float]"
 
 - case: list_optional
   main: |
@@ -44,4 +44,4 @@
 
     x = env.float.list_optional("FOO")
 
-    reveal_type(x)  # N: Revealed type is 'Union[builtins.list[builtins.float*], None]'
+    reveal_type(x)  # N: Revealed type is "Union[builtins.list[builtins.float], None]"

@@ -23,19 +23,24 @@ In the example above:
 
 Everything is designed to be type safe.
 """
-
 import builtins
 import os
-from typing import (
-    Callable, Generic, Optional, List, Union, TypeVar, TYPE_CHECKING
-)
+from typing import Callable
+from typing import Generic
+from typing import List
+from typing import Optional
+from typing import TYPE_CHECKING
+from typing import TypeVar
+from typing import Union
 
-
-from .util import MISSING, Empty
 from .core import InvalidConfig
-from .url import Url, parse as parse_url
-from .path import Path, parse as parse_path
 from .email import parse as parse_email
+from .path import parse as parse_path
+from .path import Path
+from .url import parse as parse_url
+from .url import Url
+from .util import Empty
+from .util import MISSING
 
 __all__ = (
     "MissingFromEnv",

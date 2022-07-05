@@ -1,16 +1,21 @@
 import io
 import re
 
-from setuptools import find_packages, setup
+from setuptools import find_packages
+from setuptools import setup
 
 
 with io.open("README.md", "rt", encoding="utf8") as f:
     readme = f.read()
 
 with io.open("src/configur8/__about__.py", "rt", encoding="utf8") as f:
-    version_info = re.search(r"version_info = \((.*)\)", f.read())
-    version_info = [x.strip() for x in version_info.group(1).split(",")]
-    version = '.'.join(map(str, version_info))
+    match = re.search(r"version_info = \((.*)\)", f.read())
+
+    if match is None:
+        raise SystemError
+
+    version_info = [x.strip() for x in match.group(1).split(",")]
+    version = ".".join(map(str, version_info))
 
 
 setup_args = dict(
@@ -19,9 +24,7 @@ setup_args = dict(
     url="https://github.com/StratusCode/configur8",
     maintainer="Nick Joyce",
     maintainer_email="nick@stratuscode.com",
-    description=(
-        "Python configuration and validation library",
-    ),
+    description=("Python configuration and validation library",),
     long_description=readme,
     packages=find_packages("src"),
     package_dir={"": "src"},

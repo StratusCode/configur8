@@ -1,5 +1,10 @@
-from typing import Optional, Dict, List, Union
-from urllib.parse import urlparse, ParseResult, parse_qs
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
+from urllib.parse import parse_qs
+from urllib.parse import ParseResult
+from urllib.parse import urlparse
 
 __all__ = (
     "parse",
