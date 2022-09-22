@@ -1,0 +1,33 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry==1.2.1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: poetry
+      - name: Set up Task
+        uses: arduino/setup-task@v1
+      - name: Install Python dependencies
+        run: task poetry-install PYTHON_VERSION=${{ matrix.python-version }}
+      - name: Build package
+        run: task package PYTHON_VERSION=${{ matrix.python-version }}
+      - name: Publish package
+        run: >-
+          task publish PYTHON_VERSION=${{ matrix.python-version }} --
+          --username="__token__"
+          --password="${{ secrets.PYPI_API_TOKEN }}"

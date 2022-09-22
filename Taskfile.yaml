@@ -96,7 +96,7 @@ tasks:
     sources:
       - src/**/*
     cmds:
-      - '{{.POETRY}} build'
+      - '{{.POETRY}} build {{.CLI_ARGS}}'
 
   # push docker image to registry
   publish:
@@ -104,7 +104,7 @@ tasks:
     deps:
       - package
     cmds:
-      - '{{.POETRY}} publish'
+      - '{{.POETRY}} publish {{.CLI_ARGS}}'
 
   test:
     deps:
