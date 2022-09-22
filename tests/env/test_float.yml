@@ -20,7 +20,7 @@
 
     x = env.float("FOO", [1])
   out: |
-    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "List[int]"; expected "Union[Empty, str, float]"
+    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "List[int]"; expected "Union[Empty, str, float]"  [arg-type]
 
 - case: optional
   main: |

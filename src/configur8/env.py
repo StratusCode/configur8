@@ -128,7 +128,7 @@ class EnvVar(Generic[T]):
         raw_value = self.default(env_var_name, default)
 
         if isinstance(raw_value, list):
-            return raw_value  # type: ignore
+            return raw_value
 
         if TYPE_CHECKING:
             assert not isinstance(raw_value, Empty)
@@ -157,7 +157,7 @@ def parse_bool(raw_value: Union[builtins.str, builtins.bool]) -> builtins.bool:
     if isinstance(raw_value, builtins.bool):
         return raw_value
 
-    return raw_value in BOOLEAN_TRUTHY_VALUES
+    return raw_value.lower() in BOOLEAN_TRUTHY_VALUES
 
 
 def parse_int(raw_value: Union[builtins.str, builtins.int]) -> builtins.int:

@@ -13,6 +13,7 @@ An example:
 ```python
 from configur8 import env
 
+
 SECRET_KEY = env.str("SECRET_KEY")
 NUM_WORKERS = env.int("NUM_WORKERS", 2)
 DEBUG = env.bool("DEBUG", False)

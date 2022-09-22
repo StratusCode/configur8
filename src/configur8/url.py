@@ -13,6 +13,8 @@ __all__ = (
 
 
 class Url:
+    result: ParseResult
+
     def __init__(self, result: ParseResult):
         self.result = result
 

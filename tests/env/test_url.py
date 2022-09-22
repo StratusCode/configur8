@@ -1,7 +1,8 @@
 import os
+from typing import List, overload
 
 import pytest
-from configur8 import env
+from configur8 import env, url
 
 
 def test_sanity(my_env):
@@ -61,7 +62,7 @@ def test_list(my_env):
     """
     must return a list for the supplied env var
     """
-    assert env.url.list("URL_LIST") == ["http://foo", "http://bar"]
+    assert env.url.list("URL_LIST") == to_url(["http://foo", "http://bar"])
 
 
 def test_list_missing():
@@ -80,10 +81,10 @@ def test_list_separator(my_env):
     """
     os.environ["MY_VAR"] = "http://foo|http://bar"
 
-    assert env.url.list("MY_VAR", separator="|") == [
+    assert env.url.list("MY_VAR", separator="|") == to_url([
         "http://foo",
         "http://bar",
-    ]
+    ])
 
 
 def test_list_optional(my_env):
@@ -92,7 +93,10 @@ def test_list_optional(my_env):
     """
     assert "URL_LIST" in os.environ
 
-    assert env.url.list_optional("URL_LIST") == ["http://foo", "http://bar"]
+    assert env.url.list_optional("URL_LIST") == to_url([
+        "http://foo",
+        "http://bar",
+    ])
 
 
 def test_list_optional_missing():
@@ -110,14 +114,13 @@ def test_list_optional_separator(my_env):
     """
     os.environ["MY_VAR"] = "http://foo|http://bar"
 
-    assert env.url.list_optional("MY_VAR", separator="|") == [
+    assert env.url.list_optional("MY_VAR", separator="|") == to_url([
         "http://foo",
         "http://bar",
-    ]
+    ])
 
 
 def test_str_protocol(my_env):
-    """ """
     os.environ["MY_VAR"] = "http://localhost"
 
     value = env.url("MY_VAR")
@@ -127,3 +130,23 @@ def test_str_protocol(my_env):
     assert hasattr(value, "replace")
     assert hasattr(value, "upper")
     assert hasattr(value, "lower")
+
+
+@overload
+def to_url(value: List[str]) -> List[url.Url]:
+    ...
+
+
+@overload
+def to_url(value: str) -> url.Url:
+    ...
+
+
+def to_url(value):
+    if isinstance(value, str):
+        return url.parse(value)
+
+    if isinstance(value, list):
+        return [url.parse(v) for v in value]
+
+    raise TypeError(f"Cannot convert {value} to url")

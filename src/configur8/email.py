@@ -1,5 +1,4 @@
-from email_validator import EmailNotValidError
-from email_validator import validate_email
+from email_validator import EmailNotValidError, validate_email
 
 from .core import InvalidConfig
 
@@ -13,6 +12,8 @@ def parse(email: str) -> str:
         raise InvalidConfig(str(exc)) from exc
 
     if not result.email:
-        raise InvalidConfig("Email is not valid??")
+        raise InvalidConfig(f"Email is not valid?? ({email!r})")
+
+    assert isinstance(result.email, str)
 
     return result.email

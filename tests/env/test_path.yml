@@ -20,7 +20,7 @@
 
     x = env.path("FOO", 2)
   out: |
-    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Union[Empty, str, Path]"
+    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Union[Empty, str, Path]"  [arg-type]
 
 - case: optional
   main: |

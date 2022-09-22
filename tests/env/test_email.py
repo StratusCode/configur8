@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from configur8 import env
+from configur8 import env, core
 
 
 def test_sanity(my_env):
@@ -125,7 +125,7 @@ def test_invalid_email(my_env):
     """
     os.environ["MY_VAR"] = "foo"
 
-    with pytest.raises(env.InvalidConfig) as exc:
+    with pytest.raises(core.InvalidConfig) as exc:
         env.email("MY_VAR")
 
     assert str(exc.value) == (

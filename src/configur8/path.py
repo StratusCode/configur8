@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from typing import Union
 
 __all__ = (
@@ -8,6 +8,8 @@ __all__ = (
 
 
 class Path:
+    path: str
+
     def __init__(self, path: str):
         self.path = path
 
@@ -28,11 +30,11 @@ class Path:
 
     def open(
         self,
-        mode="r",
-        buffering=-1,
-        encoding=None,
-        errors=None,
-        newline=None,
+        mode: str = "r",
+        buffering: int = -1,
+        encoding: Optional[str] = None,
+        errors: Optional[str] = None,
+        newline: Optional[str] = None,
     ):
         """
         See https://docs.python.org/3/library/functions.html#open for arg
@@ -48,10 +50,14 @@ class Path:
         )
 
     def read(self) -> str:
-        return self.open().read()
+        ret = self.open(mode="rt", encoding="utf-8").read()
 
-    def readlines(self, newline=None) -> List[str]:
-        return self.open().readlines()
+        return ret  # type: ignore
+
+    def readlines(self, newline: Optional[str] = None) -> List[str]:
+        ret = self.open(newline=newline).readlines()
+
+        return ret  # type: ignore
 
 
 def parse(path: Union[str, Path]) -> Path:
