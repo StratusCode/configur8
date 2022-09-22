@@ -103,16 +103,13 @@ my_creds = env.path("SERVICE_CREDS").read()
 
 ## Development
 
-```shell
-mkvirtualenv configur8 --python=`which python3`
-make local
-```
+1. [Install Poetry](https://python-poetry.org/docs/#installation)
+2. [Install Task](https://taskfile.dev/installation/)
 
 ### Running tests
 
 ```shell
-workon configur8
-make test
+task test
 ```
 
 ### Publishing to PyPI
@@ -121,9 +118,10 @@ make test
 
 1. Ensure that you are on a clean master.
 2. Update `version_info` in `src/configur8/__about__.py` to `__VERSION__`.
-3. ```shell
-   git add src/configur8/__about__.py
+3. Update version in `pyproject.toml` to `__VERSION__`.
+4. ```shell
+   git add src/configur8/__about__.py pypoetry.toml
    git commit -m "Bump to __VERSION__"
    git tag v__VERSION__
-   git push origin master --tags
-4. Wait for CircleCI to succeed and publish the library to the private PyPI.
+   git push origin --tags
+5. Wait for Github Actions to succeed and publish the library to the public PyPI.
