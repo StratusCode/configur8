@@ -22,12 +22,14 @@ jobs:
           cache: poetry
       - name: Set up Task
         uses: arduino/setup-task@v1
+      - name: Configure Credentials
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: poetry config pypi-token.pypi "$PYPI_TOKEN"
       - name: Install Python dependencies
         run: task poetry-install PYTHON_VERSION=${{ matrix.python-version }}
       - name: Build package
         run: task package PYTHON_VERSION=${{ matrix.python-version }}
       - name: Publish package
         run: >-
-          task publish PYTHON_VERSION=${{ matrix.python-version }} --
-          --username="__token__"
-          --password="${{ secrets.PYPI_API_TOKEN }}"
+          task publish PYTHON_VERSION=${{ matrix.python-version }}
