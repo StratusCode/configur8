@@ -27,3 +27,4 @@ jobs:
         run: task lint PYTHON_VERSION=${{ matrix.python-version }}
       - name: Test
         run: task test PYTHON_VERSION=${{ matrix.python-version }}
+      - uses: codecov/codecov-action@v3
