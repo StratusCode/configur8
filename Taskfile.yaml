@@ -112,7 +112,7 @@ tasks:
     cmds:
       - >-
         {{.POETRY}} run pytest
-        --cov-report html --cov-report term --cov=src
+        --cov-report html --cov-report term --cov=.
         --mypy-ini-file=./mypy.ini
         {{.CLI_ARGS}}
 
