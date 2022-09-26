@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "configur8"
-version = "1.6"
+version = "1.6.1"
 description = "Type-safe configuration and validation library"
 authors = ["Nick Joyce <nick@stratuscode.com>"]
 
