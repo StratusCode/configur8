@@ -244,6 +244,9 @@ class YamlConfig:
         except ConfigError:
             return None
 
+        if value is None:
+            return None
+
         if not isinstance(value, type_):
             raise ConfigError(
                 self.with_path(path),

@@ -31,3 +31,10 @@ str_optional: baz
 """)
 
     assert ret.str_optional == "baz"
+
+    ret = parse("""
+str: bar
+str_optional: null
+""")
+
+    assert ret.str_optional is None
