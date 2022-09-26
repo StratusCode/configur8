@@ -222,10 +222,10 @@ class YamlConfig:
     ) -> Data:
         value = self.path(path, default)
 
-        if value is default:
+        if value == default:
             if not isinstance(value, type_):
                 raise TypeError(
-                    "Expected {type_} at {path!r}, got {value!r} instead"
+                    f"Expected {type_} at {path!r}, got {value!r} instead"
                 )
 
             return value
@@ -239,7 +239,18 @@ class YamlConfig:
         return value
 
     def optional(self, type_: Type[Data], path: str) -> Optional[Data]:
-        return self.get(type_, path, default=None)
+        try:
+            value = self.path(path)
+        except ConfigError:
+            return None
+
+        if not isinstance(value, type_):
+            raise ConfigError(
+                self.with_path(path),
+                f"{type_} expected but found {type(value)}"
+            )
+
+        return value
 
     def with_path(self, path: str) -> str:
         if self.prefix is None:
