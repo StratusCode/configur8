@@ -76,7 +76,7 @@ def load(path: Optional[str] = None) -> Config:
 
 import builtins
 import re
-from typing import Any, Dict, List, Optional, Sequence, Type, TypeVar, Union
+import typing as t
 
 
 class Missing:
@@ -84,12 +84,12 @@ class Missing:
 
 
 MISSING = Missing()
-Data = TypeVar("Data")
-PathLike = Sequence[Union[str, int]]
+Data = t.TypeVar("Data")
+PathLike = t.Sequence[t.Union[str, int]]
 
 
 class Path:
-    data: List[Union[str, int]]
+    data: t.List[t.Union[str, int]]
 
     match = re.compile(r"([a-zA-Z0-9_-]+)\.?|\[([0-9]+)\]\.?")
 
@@ -123,7 +123,7 @@ class Path:
 
     @staticmethod
     def decode(path: str) -> "Path":
-        ret: List[Union[str, int]] = []
+        ret: t.List[t.Union[str, int]] = []
 
         for s, i in Path.match.findall(path):
             if len(s) > 0:
@@ -138,7 +138,7 @@ class Path:
 
         return Path(ret)
 
-    def __add__(self, other: Any) -> "Path":
+    def __add__(self, other: t.Any) -> "Path":
         if isinstance(other, str):
             return Path(self.data + Path.decode(other).data)
         elif isinstance(other, Path):
@@ -152,7 +152,7 @@ class ConfigError(Exception):
 
     def __init__(
         self,
-        path: Union[PathLike, Path, str],
+        path: t.Union[PathLike, Path, str],
         message: str,
     ) -> None:
         self.message = message
@@ -169,13 +169,13 @@ class ConfigError(Exception):
 
 
 class YamlConfig:
-    root: Dict[str, Any]
-    prefix: Optional[Path]
+    root: t.Dict[str, t.Any]
+    prefix: t.Optional[Path]
 
     def __init__(
         self,
-        root: Dict[str, Any],
-        prefix: Optional[Union[str, Path]] = None,
+        root: t.Dict[str, t.Any],
+        prefix: t.Optional[t.Union[str, Path]] = None,
     ) -> None:
         self.root = root
 
@@ -190,8 +190,8 @@ class YamlConfig:
     def path(
         self,
         path: str,
-        default: Union[Missing, Any] = MISSING,
-    ) -> Any:
+        default: t.Union[Missing, t.Any] = MISSING,
+    ) -> t.Any:
         obj = self.root
 
         if self.prefix is not None:
@@ -216,9 +216,9 @@ class YamlConfig:
 
     def get(
         self,
-        type_: Type[Data],
+        type_: t.Type[Data],
         path: str,
-        default: Union[Missing, Data] = MISSING,
+        default: t.Union[Missing, Data] = MISSING,
     ) -> Data:
         value = self.path(path, default)
 
@@ -238,7 +238,7 @@ class YamlConfig:
 
         return value
 
-    def optional(self, type_: Type[Data], path: str) -> Optional[Data]:
+    def optional(self, type_: t.Type[Data], path: str) -> t.Optional[Data]:
         try:
             value = self.path(path)
         except ConfigError:
@@ -270,42 +270,42 @@ class YamlConfig:
     def str(
         self,
         path: str,
-        default: Union[Missing, str] = MISSING,
+        default: t.Union[Missing, str] = MISSING,
     ) -> str:
         return self.get(str, path, default)
 
-    def str_optional(self, path: builtins.str) -> Optional[builtins.str]:
+    def str_optional(self, path: builtins.str) -> t.Optional[builtins.str]:
         return self.optional(str, path)
 
     def int(
         self,
         path: builtins.str,
-        default: Union[Missing, int] = MISSING,
+        default: t.Union[Missing, int] = MISSING,
     ) -> int:
         return self.get(int, path, default)
 
-    def int_optional(self, path: builtins.str) -> Optional[builtins.int]:
+    def int_optional(self, path: builtins.str) -> t.Optional[builtins.int]:
         return self.optional(int, path)
 
     def list(
         self,
         path: builtins.str,
-        default: Union[Missing, list] = MISSING,
-    ) -> List[Any]:
+        default: t.Union[Missing, list] = MISSING,
+    ) -> t.List[t.Any]:
         return self.get(list, path, default)
 
-    def list_optional(self, path: builtins.str) -> Optional[List[Any]]:
+    def list_optional(self, path: builtins.str) -> t.Optional[t.List[t.Any]]:
         return self.optional(list, path)
 
     def dict(
         self,
         path: builtins.str,
-        default: Union[Missing, builtins.dict] = MISSING,
-    ) -> Dict[builtins.str, Any]:
+        default: t.Union[Missing, builtins.dict] = MISSING,
+    ) -> t.Dict[builtins.str, t.Any]:
         return self.get(dict, path, default)
 
     def dict_optional(
         self,
         path: builtins.str
-    ) -> Optional[Dict[builtins.str, Any]]:
+    ) -> t.Optional[t.Dict[builtins.str, t.Any]]:
         return self.optional(dict, path)
