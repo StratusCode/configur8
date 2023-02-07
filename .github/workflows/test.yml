@@ -7,22 +7,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       fail-fast: false
 
     steps:
       - uses: actions/checkout@v3
-      - name: Install poetry
-        run: pipx install poetry==1.2.1
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
         with:
           python-version: ${{ matrix.python-version }}
-          cache: poetry
-      - name: Set up Task
+          version: 2.4.3
+          enable-pep582: true
+      - name: Setup Task
         uses: arduino/setup-task@v1
       - name: Install Python dependencies
-        run: task poetry-install PYTHON_VERSION=${{ matrix.python-version }}
+        run: task pdm:install PYTHON_VERSION=${{ matrix.python-version }}
       - name: Lint
         run: task lint PYTHON_VERSION=${{ matrix.python-version }}
       - name: Test

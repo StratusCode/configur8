@@ -3,6 +3,7 @@
 .pytest_cache
 .task
 .vscode
+.pdm.toml
 
 build
 dist

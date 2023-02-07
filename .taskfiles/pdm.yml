@@ -1,0 +1,100 @@
+version: '3'
+
+vars:
+  PYTHON_VERSION: '{{.PYTHON_VERSION | default "3.11"}}'
+  PYTHON_PTH_DIRS: '{{.PYTHON_PTH_DIRS | default "src"}}'
+  VENV_PATH: '{{.VENV_PATH | default ".venv"}}'
+
+tasks:
+  venv:
+    desc: Creates a virtual environment via PDM if it doesn't exist
+    run: once
+    status:
+      # check if the virtual environment exists
+      - '[[ ! -z "{{.VENV_PATH}}" ]]'
+    cmds:
+      - cmd: pdm venv create {{.PYTHON_VERSION}}
+        silent: true
+      - task: venv-pth
+        silent: true
+
+  venv.pth:
+    desc: >-
+      Add a .pth file in the virtual environment that points to the src directory
+      This provides support for importing locally without installing the package
+      Also useful for vscode to resolve imports
+
+    run: once
+    internal: true
+    vars:
+      BASE_PATH: "{{.VENV_PATH}}/lib/python{{.PYTHON_VERSION}}/site-packages"
+      CWD:
+        sh: pwd
+      TARGET: "{{.BASE_PATH}}/dev.pth"
+    cmds:
+      - cmd: echo "{{.PYTHON_PTH_DIRS}}" > {{.TARGET}}
+        silent: true
+    status:
+      - test - "{{.TARGET}}"
+      # ensure that the contents of the file are correct
+      - '[[ cat "{{.TARGET}}" = "{{.PYTHON_PTH_DIRS}}" ]]'
+    generates:
+      - "{{.TARGET}}"
+
+  lock:
+    desc: Lock python dependencies for the virtual environment.
+    run: once
+    cmds:
+      - pdm lock
+    generates:
+      - pdm.lock
+    sources:
+      - pyproject.toml
+
+  update:
+    desc: Update python dependencies for the virtual environment.
+    run: once
+    cmds:
+      - pdm update
+    generates:
+      - pdm.lock
+    sources:
+      - pyproject.toml
+
+  install:
+    desc: Install all Python dependencies into the virtual environment.
+    run: once
+    deps:
+      - venv
+    sources:
+      - pdm.lock
+      - '{{.VENV_PATH}}'
+    vars:
+      OPENSSL_PREFIX:
+        sh: brew --prefix openssl
+      LDFLAGS: "-I{{.OPENSSL_PREFIX}}/include -L{{.OPENSSL_PREFIX}}/lib"
+    cmds:
+      - env LDFLAGS="{{.LDFLAGS}}" pdm install
+
+  run:
+    desc: Run a command in the virtual environment
+    deps:
+      - install
+    cmds:
+      - pdm run {{.ARGS}}
+    vars:
+      ARGS: '{{.ARGS | default ""}}'
+
+  add:
+    desc: Add a new dependency to the virtual environment
+    deps:
+      - venv
+    cmds:
+      - pdm add {{.CLI_ARGS}}
+
+  build:
+    desc: Build the package
+    deps:
+      - install
+    cmds:
+      - pdm build
