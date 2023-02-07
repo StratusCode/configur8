@@ -1,6 +1,8 @@
 version: "3"
 
 vars:
+  # format must be MAJOR.MINOR
+  PYTHON_VERSION: 3.8
   GIT_COMMIT:
     sh: git rev-parse --short HEAD
   # whether the git working directory is clean
@@ -11,114 +13,44 @@ vars:
       else
         echo "dirty"
       fi
-  POETRY_ARGS:
-    sh: |
-      if [[ "$CI" == "true" ]]; then
-        echo "--no-interaction --no-ansi"
-      fi
-  POETRY: poetry {{.POETRY_ARGS}}
+
+includes:
+  pdm:
+    taskfile: .taskfiles/pdm.yml
+    vars:
+      PYTHON_VERSION: '{{.PYTHON_VERSION}}'
 
 tasks:
-  venv:
-    desc: Create a virtual environment via poetry if it doesn't exist.
-    run: once
-    vars:
-      VENV_PATH:
-        sh: '{{.POETRY}} env info --path'
-
-    status:
-      - '[[ ! -z "{{.VENV_PATH}}" ]]'
-    cmds:
-      # this is a hack to make poetry create the virtual environment without
-      # installing any dependencies. It also checks to see if poetry is
-      # functioning properly.
-      - cmd: '{{.POETRY}} run echo ""'
-        silent: true
-
-  dev.pth:
-    desc: >-
-      Add a .pth file in the virtual environment that points to the src
-      directory this provides support for importing locally without installing
-      the package also useful for IDEs to resolve imports.
-    deps:
-      - venv
-    vars:
-      CWD:
-        sh: pwd
-      DIRS: "{{.CWD}}/src"
-      BASE_PATH:
-        sh: '{{.POETRY}} run python -c "import site; print(site.getsitepackages()[0])"'
-      TARGET: "{{.BASE_PATH}}/{{.TASK}}"
-    cmds:
-      - cmd: echo "{{.DIRS}}" > {{.TARGET}}
-        silent: true
-    status:
-      - test - "{{.TARGET}}"
-      # don't run if the contents of the file are match expectations
-      - '[[ cat "{{.TARGET}}" = "{{.DIRS}}" ]]'
-    generates:
-      - "{{.BASE_PATH}}/dev.pth"
-
-  poetry.lock:
-    desc: Lock Python dependencies.
-    run: once
-
-    cmds:
-      - '{{.POETRY}} lock --no-update'
-    status:
-      # don't run if we're running in CI environment
-      - '[[ "$CI" == "true" ]]'
-    generates:
-      - poetry.lock
-    sources:
-      - pyproject.toml
-    method: timestamp
-
-  poetry-install:
-    desc: Install all Python dependencies in a Poetry virtual environment.
-    run: once
-
-    deps:
-      - venv
-      - poetry.lock
-    sources:
-      - poetry.lock
-      - pyproject.toml
-    cmds:
-      - '{{.POETRY}} install --with dev'
-      - task: dev.pth
-
-  # build docker image locally
   package:
     desc: Build Python package, ready for publishing to PyPI.
-    deps:
-      - poetry-install
     sources:
       - src/**/*
     cmds:
-      - '{{.POETRY}} build {{.CLI_ARGS}}'
+      - task: pdm:build
 
-  # push docker image to registry
   publish:
     desc: Publish Python package to PyPI.
     deps:
       - package
     cmds:
-      - '{{.POETRY}} publish {{.CLI_ARGS}}'
+      - task: pdm:publish
 
   test:
-    deps:
-      - poetry-install
     cmds:
-      - >-
-        {{.POETRY}} run pytest
-        --cov-report html --cov-report term --cov=.
-        --mypy-ini-file=./mypy.ini
-        {{.CLI_ARGS}}
+      - task: pdm:run
+        vars:
+          ARGS: >-
+            pytest
+            --cov-report html --cov-report term --cov=.
+            --mypy-ini-file=./mypy.ini
+            --mypy-only-local-stub
+            {{.CLI_ARGS}}
 
   lint:
-    deps:
-      - poetry-install
     cmds:
-      - '{{.POETRY}} run mypy .'
-      - '{{.POETRY}} run flake8 .'
+      - task: pdm:run
+        vars:
+          ARGS: mypy src
+      - task: pdm:run
+        vars:
+          ARGS: flake8 src

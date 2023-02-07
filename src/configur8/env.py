@@ -25,13 +25,7 @@ Everything is designed to be type safe.
 """
 import builtins
 import os
-from typing import Callable
-from typing import Generic
-from typing import List
-from typing import Optional
-from typing import TYPE_CHECKING
-from typing import TypeVar
-from typing import Union
+import typing as t
 
 from .core import InvalidConfig
 from .email import parse as parse_email
@@ -53,7 +47,7 @@ __all__ = (
     "email",
 )
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 BOOLEAN_TRUTHY_VALUES = ["true", "1", "y", "yes", "ok"]
 LIST_SEPARATOR = ","
@@ -72,23 +66,23 @@ def get_raw(env_var_name: builtins.str) -> builtins.str:
         raise MissingFromEnv(f"Missing env var {env_var_name!r}")
 
 
-def get_raw_optional(env_var: builtins.str) -> Optional[builtins.str]:
+def get_raw_optional(env_var: builtins.str) -> t.Optional[builtins.str]:
     return os.getenv(env_var, None)
 
 
-class EnvVar(Generic[T]):
-    def __init__(self, parse_func: Callable[[Union[builtins.str, T]], T]):
+class EnvVar(t.Generic[T]):
+    def __init__(self, parse_func: t.Callable[[t.Union[builtins.str, T]], T]):
         self.parse_func = parse_func
 
     def default(
         self,
         env_var_name: builtins.str,
-        default: Union[Empty, builtins.str, T, List[T]] = MISSING,
-    ) -> Union[builtins.str, T, List[T]]:
+        default: t.Union[Empty, builtins.str, T, t.List[T]] = MISSING,
+    ) -> t.Union[builtins.str, T, t.List[T]]:
         if default is MISSING:
             return get_raw(env_var_name)
 
-        if TYPE_CHECKING:
+        if t.TYPE_CHECKING:
             assert not isinstance(default, Empty)
 
         raw_value = get_raw_optional(env_var_name)
@@ -101,17 +95,17 @@ class EnvVar(Generic[T]):
     def __call__(
         self,
         env_var_name: builtins.str,
-        default: Union[Empty, builtins.str, T] = MISSING,
+        default: t.Union[Empty, builtins.str, T] = MISSING,
     ) -> T:
         raw_value = self.default(env_var_name, default)
 
-        if TYPE_CHECKING:
+        if t.TYPE_CHECKING:
             assert not isinstance(raw_value, Empty)
             assert not isinstance(raw_value, list)
 
         return self.parse_func(raw_value)
 
-    def optional(self, env_var_name: builtins.str) -> Optional[T]:
+    def optional(self, env_var_name: builtins.str) -> t.Optional[T]:
         raw_value = get_raw_optional(env_var_name)
 
         if raw_value is None:
@@ -122,15 +116,15 @@ class EnvVar(Generic[T]):
     def list(
         self,
         env_var_name: builtins.str,
-        default: Union[Empty, builtins.str, List[T]] = MISSING,
+        default: t.Union[Empty, builtins.str, t.List[T]] = MISSING,
         separator=LIST_SEPARATOR,
-    ) -> List[T]:
+    ) -> t.List[T]:
         raw_value = self.default(env_var_name, default)
 
         if isinstance(raw_value, list):
             return raw_value
 
-        if TYPE_CHECKING:
+        if t.TYPE_CHECKING:
             assert not isinstance(raw_value, Empty)
             assert isinstance(raw_value, builtins.str)
 
@@ -140,7 +134,7 @@ class EnvVar(Generic[T]):
         self,
         env_var_name: builtins.str,
         separator=LIST_SEPARATOR,
-    ) -> Optional[List[T]]:
+    ) -> t.Optional[t.List[T]]:
         raw_value = get_raw_optional(env_var_name)
 
         if raw_value is None:
@@ -153,14 +147,16 @@ def parse_str(raw_value: builtins.str) -> builtins.str:
     return raw_value
 
 
-def parse_bool(raw_value: Union[builtins.str, builtins.bool]) -> builtins.bool:
+def parse_bool(
+    raw_value: t.Union[builtins.str, builtins.bool]
+) -> builtins.bool:
     if isinstance(raw_value, builtins.bool):
         return raw_value
 
     return raw_value.lower() in BOOLEAN_TRUTHY_VALUES
 
 
-def parse_int(raw_value: Union[builtins.str, builtins.int]) -> builtins.int:
+def parse_int(raw_value: t.Union[builtins.str, builtins.int]) -> builtins.int:
     if isinstance(raw_value, builtins.int):
         return raw_value
 
@@ -171,7 +167,7 @@ def parse_int(raw_value: Union[builtins.str, builtins.int]) -> builtins.int:
 
 
 def parse_float(
-    raw_value: Union[builtins.str, builtins.float],
+    raw_value: t.Union[builtins.str, builtins.float],
 ) -> builtins.float:
     try:
         return builtins.float(raw_value)
