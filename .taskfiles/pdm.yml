@@ -70,11 +70,8 @@ tasks:
       - pdm.lock
       - '{{.VENV_PATH}}'
     vars:
-      OPENSSL_PREFIX:
-        sh: brew --prefix openssl
-      LDFLAGS: "-I{{.OPENSSL_PREFIX}}/include -L{{.OPENSSL_PREFIX}}/lib"
     cmds:
-      - env LDFLAGS="{{.LDFLAGS}}" pdm install
+      - pdm install
 
   run:
     desc: Run a command in the virtual environment
