@@ -43,6 +43,7 @@ tasks:
             pytest
             --cov-report html --cov-report term --cov=.
             --mypy-ini-file=./mypy.ini
+            --mypy-only-local-stub
             {{.CLI_ARGS}}
 
   lint:
