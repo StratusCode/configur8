@@ -1,12 +1,21 @@
-from configur8.__about__ import version as __version__  # noqa: F401
-from configur8.__about__ import version_info as __version_info__  # noqa: F401
-
-from .core import InvalidConfig
-from .path import Path
-from .url import Url
+from configur8.__about__ import (
+    __version__,
+    __version_info__,
+)
+from configur8.core import InvalidConfig
+from configur8.path import Path
+from configur8.url import Url
+from configur8.cfg import (
+    parse,
+    load,
+)
 
 __all__ = (
     "InvalidConfig",
     "Url",
     "Path",
+    "parse",
+    "load",
+    "__version__",
+    "__version_info__",
 )
