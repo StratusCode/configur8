@@ -1,91 +1,58 @@
 """
-Type-safe (ish) YAML configuration and validation.
+Type-safe configuration and validation.
+
+Python
 
 An example ``config.py`` file:
 
 ```python
-from typing import Optional
+import typing as t
 
-import yaml
-
-from configur8 import cfg, env
+from configur8 import cfg
 
 
-class MySQLConfig:
-    host: str
-    port: int
-    username: Optional[str]
-    password: Optional[str]
+class BaseMySQL:
+    username: str
+    password: str
     database: str
 
-    def __init__(
-        self,
-        # shame that nested inference is not a thing in MyPy yet
-        host: str,
-        port: int,
-        username: Optional[str],
-        password: Optional[str],
-        database: str,
-    ) -> None:
-        self.host = host
-        self.port = port
-        self.username = username
-        self.password = password
-        self.database = database
+
+class MySQLHost:
+    host: str
+    port: int = 3306
+
+
+class MySQLSocket:
+    socket: str
+
+
+MySQL = t.Union[MySQLHost, MySQLSocket]
 
 
 class Config:
-    mysql: MySQLConfig
-
-    def __init__(self, mysql: MySQLConfig) -> None:
-        self.mysql = mysql
-
-
-def get_mysql(data: cfg.YamlConfig) -> MySQLConfig:
-    return MySQLConfig(
-        host=data.str("host"),
-        port=data.int("port"),
-        username=data.str_optional("username"),
-        password=data.str_optional("password"),
-        database=data.str("database"),
-    )
-
-
-def parse(data: str) -> Config:
-    config = yaml.safe_load(data)
-
-    if not isinstance(config, dict):
-        raise cfg.ConfigError("", "Expected root from yaml to be a dict")
-
-    config = cfg.YamlConfig(config)
-
-    return Config(
-        mysql=get_mysql(config.with_prefix("mysql")),
-    )
+    mysql: MySQL
 
 
 def load(path: Optional[str] = None) -> Config:
-    if path is None:
-        # Load from environment
-        path = env.str("CONFIG_PATH")
-
-    with open(path, "rb") as fp:
-        return parse(fp.read().decode("utf-8"))
+    return cfg.load(Config, path)
 ```
 """
 
-import builtins
+import inspect
+import json
 import re
 import typing as t
+import typing_extensions as te
+
+import yaml
+
+from configur8 import env, types
 
 
-class Missing:
-    pass
-
-
-MISSING = Missing()
 Data = t.TypeVar("Data")
-PathLike = t.Sequence[t.Union[str, int]]
+PathLike = t.List[t.Union[str, int]]
+DataValues = t.Dict[str, t.Any]
+SupportedFormats = te.Literal["yaml", "json"]
 
 
 class Path:
@@ -111,7 +78,7 @@ class Path:
                 ret += f"[{part}]"
             else:
                 raise TypeError(
-                    f"Unexpected {type(part)} at {count} in {self.path!r}"
+                    f"Unexpected {type(part)} at {count} in {self.data!r}"
                 )
 
             first = False
@@ -168,144 +135,168 @@ class ConfigError(Exception):
         return f"{self.path}: {self.message}"
 
 
-class YamlConfig:
-    root: t.Dict[str, t.Any]
-    prefix: t.Optional[Path]
+def into(  # noqa: C901
+    config: t.Type[Data],
+    data: t.Any,
+    _path: t.Optional[PathLike] = None,
+) -> Data:
+    data_dict = types.to_dict(data)
 
-    def __init__(
-        self,
-        root: t.Dict[str, t.Any],
-        prefix: t.Optional[t.Union[str, Path]] = None,
-    ) -> None:
-        self.root = root
+    ret = config()
+    path = (_path or [])
 
-        if prefix is None:
-            self.prefix = prefix
-        else:
-            if isinstance(prefix, str):
-                self.prefix = Path.decode(prefix)
-            else:
-                self.prefix = prefix
-
-    def path(
-        self,
-        path: str,
-        default: t.Union[Missing, t.Any] = MISSING,
+    def parse_value(
+        type_: t.Any,
+        value: t.Any,
+        name: t.Union[str, int],
     ) -> t.Any:
-        obj = self.root
+        new_path = path + [name]
 
-        if self.prefix is not None:
-            path = str(self.prefix) + "." + path
-
-        for part in Path.decode(path):
-            try:
-                obj = obj[part]
-            except KeyError as err:
-                if default is not MISSING:
-                    return default
-
-                raise ConfigError(path.split("."), "missing") from err
-            except TypeError as err:
-                # report this please
-                print(Path.decode(path).data)
-                print(path, type(part), obj)
-
-                raise ConfigError(path.split("."), "invalid") from err
-
-        return obj
-
-    def get(
-        self,
-        type_: t.Type[Data],
-        path: str,
-        default: t.Union[Missing, Data] = MISSING,
-    ) -> Data:
-        value = self.path(path, default)
-
-        if value == default:
-            if not isinstance(value, type_):
-                raise TypeError(
-                    f"Expected {type_} at {path!r}, got {value!r} instead"
+        if type_ is str:
+            if not isinstance(value, str):
+                raise ConfigError(
+                    new_path,
+                    f"Expected str, got {value!r}",
                 )
 
             return value
+        elif type_ is int:
+            if not isinstance(value, int):
+                raise ConfigError(
+                    new_path,
+                    f"Expected int, got {value!r}",
+                )
 
-        if not isinstance(value, type_):
+            return value
+        elif type_ is bool:
+            if not isinstance(value, bool):
+                raise ConfigError(
+                    new_path,
+                    f"Expected bool, got {value!r}",
+                )
+
+            return value
+        elif type_ is float:
+            if not isinstance(value, float):
+                raise ConfigError(
+                    new_path,
+                    f"Expected float, got {value!r}",
+                )
+
+            return value
+        elif isinstance(type_, types.NoneType):
+            if value is not None:
+                raise ConfigError(
+                    new_path,
+                    f"Expected None, got {value!r}",
+                )
+
+            return value
+        elif value is None:
+            if isinstance(type_, types.NoneType):
+                return value
+
+            if types.is_union_type(type_):
+                if types.NoneType in type_.__args__:
+                    return value
+
+            if types.is_optional_type(type_):
+                return value
+
+            raise ConfigError(new_path, "Unexpected None")
+        elif inspect.isclass(type_):
+            return into(type_, value, path)
+        elif types.is_union_type(type_):
+            for union_arg in type_.__args__:
+                try:
+                    return parse_value(union_arg, value, name)
+                except ConfigError:
+                    pass
+
+            raise ConfigError(new_path, "expected one of the union types")
+        elif types.is_list_type(type_):
+            if not isinstance(value, list):
+                raise ConfigError(new_path, f"Expected list, got {value!r}")
+
+            return [
+                parse_value(type_.__args__[0], item, i)
+                for i, item in enumerate(value)
+            ]
+        elif types.is_dict_type(type_):
+            if not isinstance(value, dict):
+                raise ConfigError(new_path, f"Expected dict, got {value!r}")
+
+            ret = {}
+
+            for k, v in value.items():
+                k = parse_value(type_.__args__[0], k, k)
+                v = parse_value(type_.__args__[1], v, k)
+
+                ret[k] = v
+
+            return ret
+        else:
             raise ConfigError(
-                self.with_path(path),
-                f"{type_} expected but found {type(value)}"
+                path,
+                f"Unexpected type {type_!r} for {name!r}, got {value!r}"
             )
 
-        return value
+    annotations, default_values = types.get_annotation(config)
 
-    def optional(self, type_: t.Type[Data], path: str) -> t.Optional[Data]:
+    for name, value in default_values.items():
+        if name not in data_dict:
+            data_dict[name] = value
+
+    for name, type_ in annotations.items():
         try:
-            value = self.path(path)
-        except ConfigError:
-            return None
+            data_value = data_dict[name]
+        except KeyError:
+            raise ConfigError(name, "missing")
 
-        if value is None:
-            return None
+        parsed_value = parse_value(type_, data_value, name)
 
-        if not isinstance(value, type_):
-            raise ConfigError(
-                self.with_path(path),
-                f"{type_} expected but found {type(value)}"
-            )
+        setattr(ret, name, parsed_value)
 
-        return value
+    return ret
 
-    def with_path(self, path: str) -> str:
-        if self.prefix is None:
-            return path
 
-        return str(self.prefix + path)
+def parse(
+    config: t.Type[Data],
+    data: str,
+    format: SupportedFormats = "yaml",
+) -> Data:
+    """
+    Parse config from a string.
 
-    def with_prefix(self, prefix: str) -> "YamlConfig":
-        if self.prefix is None:
-            return YamlConfig(self.root, prefix)
+    :param config: The annotated config class to load into.
+    :param data: The encoded config data.
+    """
+    if format == "yaml":
+        parsed_data = yaml.safe_load(data)
+    elif format == "json":
+        parsed_data = json.loads(data)
+    else:
+        raise ValueError(f"Unknown format {format!r}")
 
-        return YamlConfig(self.root, f"{self.prefix}.{prefix}")
+    return into(config, parsed_data)
 
-    def str(
-        self,
-        path: str,
-        default: t.Union[Missing, str] = MISSING,
-    ) -> str:
-        return self.get(str, path, default)
 
-    def str_optional(self, path: builtins.str) -> t.Optional[builtins.str]:
-        return self.optional(str, path)
+def load(
+    config: t.Type[Data],
+    path: t.Optional[str] = None,
+    format: SupportedFormats = "yaml",
+) -> Data:
+    """
+    Load a config from a file.
 
-    def int(
-        self,
-        path: builtins.str,
-        default: t.Union[Missing, int] = MISSING,
-    ) -> int:
-        return self.get(int, path, default)
+    :param config: The annotated config class to load into.
+    :param path: The path to the config file. If not given, the
+        ``CONFIGUR8_PATH`` environment variable is used.
+    """
+    if path is None:
+        path = env.str("CONFIGUR8_PATH")
 
-    def int_optional(self, path: builtins.str) -> t.Optional[builtins.int]:
-        return self.optional(int, path)
+    with open(path, "rb") as fp:
+        raw_config = fp.read().decode("utf-8")
 
-    def list(
-        self,
-        path: builtins.str,
-        default: t.Union[Missing, list] = MISSING,
-    ) -> t.List[t.Any]:
-        return self.get(list, path, default)
-
-    def list_optional(self, path: builtins.str) -> t.Optional[t.List[t.Any]]:
-        return self.optional(list, path)
-
-    def dict(
-        self,
-        path: builtins.str,
-        default: t.Union[Missing, builtins.dict] = MISSING,
-    ) -> t.Dict[builtins.str, t.Any]:
-        return self.get(dict, path, default)
-
-    def dict_optional(
-        self,
-        path: builtins.str
-    ) -> t.Optional[t.Dict[builtins.str, t.Any]]:
-        return self.optional(dict, path)
+    return parse(config, raw_config, format=format)
