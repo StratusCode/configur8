@@ -15,18 +15,17 @@ else:
     NoneType = type(None)
 
 
-if hasattr(types, "UnionType"):
-    def is_union_type(type_: t.Any) -> bool:
-        return isinstance(type_, types.UnionType)  # type: ignore
-else:
-    def is_union_type(type_: t.Any) -> bool:
-        if hasattr(type_, "__origin__"):
-            type_ = type_.__origin__
+def is_union_type(type_: t.Any) -> bool:
+    if hasattr(types, "UnionType") and isinstance(type_, types.UnionType):
+        return True
 
-        if isinstance(type_, t._SpecialForm):
-            return type_._name == "Union"  # type: ignore
+    if hasattr(type_, "__origin__"):
+        type_ = type_.__origin__
 
-        return False
+    if isinstance(type_, t._SpecialForm):
+        return type_._name == "Union"  # type: ignore
+
+    return False
 
 
 def is_optional_type(type_: t.Any) -> bool:
