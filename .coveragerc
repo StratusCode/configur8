@@ -1,0 +1,6 @@
+[run]
+branch = True
+omit = __pypackages__/*
+
+[report]
+ignore_errors = True

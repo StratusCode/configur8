@@ -39,12 +39,7 @@ tasks:
     cmds:
       - task: pdm:run
         vars:
-          ARGS: >-
-            pytest
-            --cov-report html --cov-report term --cov=.
-            --mypy-ini-file=./mypy.ini
-            --mypy-only-local-stub
-            {{.CLI_ARGS}}
+          ARGS: pytest {{.CLI_ARGS}}
 
   lint:
     cmds:
