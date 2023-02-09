@@ -1,13 +1,55 @@
 configur8
 =========
 
-Python configuration and validation library.
+Python type-safe configuration and validation library.
 
-## Usage
+## Introduction
 
-This library has been developed to help manage and mitigate configuration issues
-when deploying code.
+Configuration validation is a common problem in Python. This library aims to
+provide a simple, type-safe way to validate configuration either by file or
+environment variables.
 
+An example:
+
+/path/to/config.yaml:
+
+```yaml
+mysql:
+   host: localhost
+   port: 3306
+   user: not_root
+   password: my_password
+```
+
+```python
+import configur8
+from configur8 import env
+
+
+class MySQL:
+   # define the fields and their types
+   host: str
+   # default values are supported
+   port: int = 3306
+   # default values can programmatically be defined, e.g. from an env var
+   user: str = env.str("MYSQL_USER", "definitely_not_root")
+   password: str
+
+
+class Config:
+   mysql: MySQL
+
+
+config = configur8.load(Config, "/path/to/config.yaml")
+
+assert isinstance(config.mysql, MySQL)  # True
+```
+
+The above example will load the configuration from the file at
+``/path/to/config.yaml`` and validate it against the ``Config`` class. If the
+configuration is invalid, an exception will be raised.
+
+## Environment only
 An example:
 
 ```python
@@ -103,7 +145,7 @@ my_creds = env.path("SERVICE_CREDS").read()
 
 ## Development
 
-1. [Install Poetry](https://python-poetry.org/docs/#installation)
+1. [Install PDM](https://pdm.fming.dev/latest/)
 2. [Install Task](https://taskfile.dev/installation/)
 
 ### Running tests
@@ -117,11 +159,10 @@ task test
 **NOTE** Replace `__VERSION__` with a semver identifier such as `0.9.3`
 
 1. Ensure that you are on a clean master.
-2. Update `version_info` in `src/configur8/__about__.py` to `__VERSION__`.
-3. Update version in `pyproject.toml` to `__VERSION__`.
-4. ```shell
-   git add src/configur8/__about__.py pypoetry.toml
+2. Update `__version__` in `src/configur8/__about__.py` to `__VERSION__`.
+3. ```shell
+   git add src/configur8/__about__.py
    git commit -m "Bump to __VERSION__"
    git tag v__VERSION__
    git push origin --tags
-5. Wait for Github Actions to succeed and publish the library to the public PyPI.
+4. Wait for Github Actions to succeed and publish the library to the public PyPI.
