@@ -4,6 +4,26 @@ description = "Type-safe configuration and validation library"
 authors = [{ name = "Nick Joyce", email = "nick@stratuscode.com" }]
 requires-python = ">=3.7,<4.0"
 readme = "README.md"
+keywords = [
+  "config",
+  "configuration",
+  "configurations",
+  "settings",
+  "env",
+  "environment",
+  "environments",
+  "application",
+  "python-config",
+]
+classifiers = [
+    "Topic :: Software Development",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
 license = { text = "MIT" }
 dynamic = ["version"]
 
