@@ -160,9 +160,10 @@ task test
 
 1. Ensure that you are on a clean master.
 2. Update `__version__` in `src/configur8/__about__.py` to `__VERSION__`.
-3. ```shell
-   git add src/configur8/__about__.py
+3. Update `CHANGELOG.md` with the new version and changes.
+4. ```shell
+   git add src/configur8/__about__.py CHANGELOG.md
    git commit -m "Bump to __VERSION__"
    git tag v__VERSION__
    git push origin --tags
-4. Wait for Github Actions to succeed and publish the library to the public PyPI.
+5. Wait for Github Actions to succeed and publish the library to the public PyPI.
