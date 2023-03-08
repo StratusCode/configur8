@@ -263,3 +263,20 @@ mysql:
     assert cfg.mysql.username == "root"
     assert cfg.mysql.password == "password"
     assert cfg.mysql.database == "test"
+
+
+def test_new_type():
+    NewStr = t.NewType("NewStr", str)
+    NewBool = t.NewType("NewBool", bool)
+
+    class TestConfig:
+        new_str: NewStr
+        new_bool: NewBool
+
+    ret = cfg.parse(TestConfig, """
+new_str: foo
+new_bool: true
+""")
+
+    assert ret.new_str == "foo"
+    assert ret.new_bool is True

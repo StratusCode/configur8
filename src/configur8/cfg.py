@@ -235,6 +235,8 @@ def into(  # noqa: C901
                 ret[k] = v
 
             return ret
+        elif types.is_new_type(type_):
+            return parse_value(type_.__supertype__, value, name)
         else:
             raise ConfigError(
                 path,

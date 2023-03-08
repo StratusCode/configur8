@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+ - `configur8.cfg` String based type annotations are not currently supported.
+ - `configur8.cfg` `typing.NewType` is now supported.
+
 ## [2.0] - 2023-02-09
 
 `configur8.cfg` completely rewritten to use annotated Python classes instead
