@@ -265,6 +265,26 @@ mysql:
     assert cfg.mysql.database == "test"
 
 
+def test_mysql_string_annotation():
+    class TestConfig:
+        mysql: "MySQLHost"
+
+    with pytest.raises(cfg.ConfigError) as err:
+        cfg.parse(TestConfig, """
+mysql:
+    host: localhost
+    username: root
+    password: password
+    database: test
+""")
+
+    assert err.value.path == ["mysql"]
+    assert str(err.value.message) == (
+        "String based annotations are not currently supported. "
+        "Please use the typing module."
+    )
+
+
 def test_new_type():
     NewStr = t.NewType("NewStr", str)
     NewBool = t.NewType("NewBool", bool)

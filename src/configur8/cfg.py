@@ -113,6 +113,9 @@ class Path:
         else:
             raise TypeError(f"{other!r}<{type(other)}>")
 
+    def __eq__(self, __o: object) -> bool:
+        return self.data == __o
+
 
 class ConfigError(Exception):
     path: Path
@@ -151,6 +154,13 @@ def into(  # noqa: C901
         name: t.Union[str, int],
     ) -> t.Any:
         new_path = path + [name]
+
+        if isinstance(type_, str):
+            raise ConfigError(
+                new_path,
+                "String based annotations are not currently supported. "
+                "Please use the typing module.",
+            )
 
         if type_ is str:
             if not isinstance(value, str):
