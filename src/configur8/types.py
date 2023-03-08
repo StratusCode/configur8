@@ -58,6 +58,16 @@ def is_dict_type(type_: t.Any) -> bool:
     return False
 
 
+def is_new_type(type_: t.Any) -> bool:
+    if not callable(type_):
+        return False
+
+    if hasattr(type_, "__supertype__"):
+        return True
+
+    return False
+
+
 def get_annotation(config: t.Type) -> t.Tuple[
     t.Dict[str, t.Any],
     t.Dict[str, t.Any],
