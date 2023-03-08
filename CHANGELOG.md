@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.0.1] - 2023-03-08
+
 ### Changed
  - `configur8.cfg` String based type annotations are not currently supported.
  - `configur8.cfg` `typing.NewType` is now supported.
