@@ -2,7 +2,7 @@
 name = "configur8"
 description = "Type-safe configuration and validation library"
 authors = [{ name = "Nick Joyce", email = "nick@boxdesign.co.uk" }]
-requires-python = ">=3.12"
+requires-python = ">=3.8"
 readme = "README.md"
 keywords = [
   "config",
