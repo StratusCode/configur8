@@ -20,7 +20,7 @@
 
     x = env.email("FOO", 2)
   out: |
-    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Union[Empty, str]"  [arg-type]
+    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "int"; expected "Missing | str"  [arg-type]
 
 - case: optional
   main: |

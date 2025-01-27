@@ -63,10 +63,12 @@ def test_list(my_env):
     """
     must return a list for the supplied env var
     """
-    assert env.path.list("CFG_PATH_LIST") == to_path([
-        "/usr/bin",
-        "/usr/local/bin",
-    ])
+    assert env.path.list("CFG_PATH_LIST") == to_path(
+        [
+            "/usr/bin",
+            "/usr/local/bin",
+        ]
+    )
 
 
 def test_list_missing():
@@ -94,10 +96,12 @@ def test_list_optional(my_env):
     """
     assert "CFG_PATH_LIST" in os.environ
 
-    assert env.path.list_optional("CFG_PATH_LIST") == to_path([
-        "/usr/bin",
-        "/usr/local/bin",
-    ])
+    assert env.path.list_optional("CFG_PATH_LIST") == to_path(
+        [
+            "/usr/bin",
+            "/usr/local/bin",
+        ]
+    )
 
 
 def test_list_optional_missing():
@@ -115,10 +119,12 @@ def test_list_optional_separator(my_env):
     """
     os.environ["MY_VAR"] = "foo:bar"
 
-    assert env.path.list_optional("MY_VAR", separator=":") == to_path([
-        "foo",
-        "bar",
-    ])
+    assert env.path.list_optional("MY_VAR", separator=":") == to_path(
+        [
+            "foo",
+            "bar",
+        ]
+    )
 
 
 def test_read(my_env):
@@ -150,13 +156,11 @@ def test_readlines(my_env):
 
 
 @overload
-def to_path(value: List[str]) -> List[path.Path]:
-    ...
+def to_path(value: List[str]) -> List[path.Path]: ...
 
 
 @overload
-def to_path(value: str) -> path.Path:
-    ...
+def to_path(value: str) -> path.Path: ...
 
 
 def to_path(value):

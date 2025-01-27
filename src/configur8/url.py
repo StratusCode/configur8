@@ -1,10 +1,5 @@
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
-from urllib.parse import parse_qs
-from urllib.parse import ParseResult
-from urllib.parse import urlparse
+import typing as t
+from urllib.parse import parse_qs, urlparse, ParseResult
 
 __all__ = (
     "parse",
@@ -34,18 +29,18 @@ class Url:
         raise TypeError(f"Cannot compare {other!r} with <Url>")
 
     @property
-    def protocol(self) -> Optional[str]:
+    def protocol(self) -> str | None:
         if self.result.scheme == "":
             return None
 
         return self.result.scheme
 
     @property
-    def username(self) -> Optional[str]:
+    def username(self) -> str | None:
         return self.result.username
 
     @property
-    def password(self) -> Optional[str]:
+    def password(self) -> str | None:
         return self.result.password
 
     @property
@@ -64,11 +59,11 @@ class Url:
         return host.split(":")[0]
 
     @property
-    def port(self) -> Optional[int]:
+    def port(self) -> int | None:
         return self.result.port
 
     @property
-    def path(self) -> Optional[str]:
+    def path(self) -> str | None:
         path = self.result.path
 
         if self.result.netloc == "":
@@ -83,7 +78,7 @@ class Url:
         return path
 
     @property
-    def query(self) -> Optional[Dict[str, List[str]]]:
+    def query(self) -> t.Dict[str, t.List[str]] | None:
         if self.result.query == "":
             return None
 
@@ -94,7 +89,7 @@ class Url:
         )
 
     @property
-    def fragment(self) -> Optional[str]:
+    def fragment(self) -> str | None:
         if self.result.fragment == "":
             return None
 
@@ -105,7 +100,7 @@ class Url:
         return getattr(str(self), name)
 
 
-def parse(data: Union[str, Url]) -> Url:
+def parse(data: str | Url) -> Url:
     if isinstance(data, Url):
         return data
 

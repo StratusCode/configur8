@@ -20,7 +20,7 @@ class MySQLSocket(BaseMySQL):
     socket: str
 
 
-MySQL = t.Union[MySQLHost, MySQLSocket]
+MySQL = MySQLHost | MySQLSocket
 
 
 class Config:
@@ -39,24 +39,30 @@ def test_optional_str():
 
     assert ret.str is None
 
-    ret = cfg.parse(TestConfig, """
+    ret = cfg.parse(
+        TestConfig,
+        """
 str: bar
-""")
+""",
+    )
 
     assert ret.str == "bar"
 
 
 def test_union_str():
     class TestConfig:
-        str: t.Union[str, None]
+        str: str | None
 
     ret = cfg.parse(TestConfig, "str: null")
 
     assert ret.str is None
 
-    ret = cfg.parse(TestConfig, """
+    ret = cfg.parse(
+        TestConfig,
+        """
 str: bar
-""")
+""",
+    )
 
     assert ret.str == "bar"
 
@@ -189,12 +195,15 @@ def test_list():
     class TestConfig:
         list: t.List[str]
 
-    ret = cfg.parse(TestConfig, """
+    ret = cfg.parse(
+        TestConfig,
+        """
 list:
 
     - foo
     - bar
-""")
+""",
+    )
 
     assert ret.list == ["foo", "bar"]
 
@@ -213,11 +222,14 @@ def test_dict():
     class TestConfig:
         dict: t.Dict[str, str]
 
-    ret = cfg.parse(TestConfig, """
+    ret = cfg.parse(
+        TestConfig,
+        """
 dict:
     foo: bar
     baz: qux
-""")
+""",
+    )
 
     assert ret.dict == {"foo": "bar", "baz": "qux"}
 
@@ -270,13 +282,16 @@ def test_mysql_string_annotation():
         mysql: "MySQLHost"
 
     with pytest.raises(cfg.ConfigError) as err:
-        cfg.parse(TestConfig, """
+        cfg.parse(
+            TestConfig,
+            """
 mysql:
     host: localhost
     username: root
     password: password
     database: test
-""")
+""",
+        )
 
     assert err.value.path == ["mysql"]
     assert str(err.value.message) == (
@@ -293,10 +308,13 @@ def test_new_type():
         new_str: NewStr
         new_bool: NewBool
 
-    ret = cfg.parse(TestConfig, """
+    ret = cfg.parse(
+        TestConfig,
+        """
 new_str: foo
 new_bool: true
-""")
+""",
+    )
 
     assert ret.new_str == "foo"
     assert ret.new_bool is True

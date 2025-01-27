@@ -2,7 +2,7 @@ version: "3"
 
 vars:
   # format must be MAJOR.MINOR
-  PYTHON_VERSION: 3.8
+  PYTHON_VERSION: 3.13
   GIT_COMMIT:
     sh: git rev-parse --short HEAD
   # whether the git working directory is clean
@@ -18,7 +18,7 @@ includes:
   pdm:
     taskfile: .taskfiles/pdm.yml
     vars:
-      PYTHON_VERSION: '{{.PYTHON_VERSION}}'
+      PYTHON_VERSION: "{{.PYTHON_VERSION}}"
 
 tasks:
   package:
@@ -39,7 +39,7 @@ tasks:
     cmds:
       - task: pdm:run
         vars:
-          ARGS: pytest {{.CLI_ARGS}}
+          ARGS: pytest {{.CLI_ARGS}} -v
 
   lint:
     cmds:
@@ -48,4 +48,4 @@ tasks:
           ARGS: mypy src
       - task: pdm:run
         vars:
-          ARGS: flake8 src
+          ARGS: ruff check src

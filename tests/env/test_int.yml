@@ -20,7 +20,7 @@
 
     x = env.int("FOO", [2])
   out: |
-    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "List[int]"; expected "Union[Empty, str, int]"  [arg-type]
+    main:3: error: Argument 2 to "__call__" of "EnvVar" has incompatible type "list[int]"; expected "Missing | str | int"  [arg-type]
 
 - case: optional
   main: |
