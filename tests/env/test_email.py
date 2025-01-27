@@ -128,6 +128,4 @@ def test_invalid_email(my_env):
     with pytest.raises(core.InvalidConfig) as exc:
         env.email("MY_VAR")
 
-    assert str(exc.value) == (
-        "The email address is not valid. " "It must have exactly one @-sign."
-    )
+    assert str(exc.value) == "An email address must have an @-sign."

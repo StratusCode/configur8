@@ -2,17 +2,9 @@ import inspect
 import types
 import typing as t
 
-__all__ = (
-    "is_union_type",
-    "NoneType",
-)
+__all__ = ("is_union_type",)
 
-
-if hasattr(types, "NoneType"):
-    # reintroduced into Python 3.10
-    NoneType = types.NoneType
-else:
-    NoneType = type(None)
+NoneType = types.NoneType  # type: ignore
 
 
 def is_union_type(type_: t.Any) -> bool:
@@ -68,7 +60,9 @@ def is_new_type(type_: t.Any) -> bool:
     return False
 
 
-def get_annotation(config: t.Type) -> t.Tuple[
+def get_annotation(
+    config: t.Type,
+) -> t.Tuple[
     t.Dict[str, t.Any],
     t.Dict[str, t.Any],
 ]:

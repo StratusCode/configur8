@@ -3,7 +3,7 @@
 .pytest_cache
 .task
 .vscode
-.pdm.toml
+.pdm-python
 __pypackages__
 
 build

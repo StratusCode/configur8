@@ -1,5 +1,4 @@
-from typing import List, Optional
-from typing import Union
+import typing as t
 
 __all__ = (
     "parse",
@@ -32,9 +31,9 @@ class Path:
         self,
         mode: str = "r",
         buffering: int = -1,
-        encoding: Optional[str] = None,
-        errors: Optional[str] = None,
-        newline: Optional[str] = None,
+        encoding: t.Optional[str] = None,
+        errors: t.Optional[str] = None,
+        newline: t.Optional[str] = None,
     ):
         """
         See https://docs.python.org/3/library/functions.html#open for arg
@@ -52,15 +51,18 @@ class Path:
     def read(self) -> str:
         ret = self.open(mode="rt", encoding="utf-8").read()
 
-        return ret  # type: ignore
+        if t.TYPE_CHECKING:
+            assert isinstance(ret, str)
 
-    def readlines(self, newline: Optional[str] = None) -> List[str]:
+        return ret
+
+    def readlines(self, newline: t.Optional[str] = None) -> t.List[str]:
         ret = self.open(newline=newline).readlines()
 
         return ret  # type: ignore
 
 
-def parse(path: Union[str, Path]) -> Path:
+def parse(path: str | Path) -> Path:
     if isinstance(path, Path):
         return path
 

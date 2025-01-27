@@ -23,6 +23,7 @@ In the example above:
 
 Everything is designed to be type safe.
 """
+
 import builtins
 import os
 import typing as t
@@ -33,24 +34,28 @@ from .path import parse as parse_path
 from .path import Path
 from .url import parse as parse_url
 from .url import Url
-from .util import Empty
+from .util import Missing
 from .util import MISSING
 
 __all__ = (
     "MissingFromEnv",
-    "str",
     "bool",
-    "int",
-    "float",
-    "url",
-    "path",
     "email",
+    "float",
+    "int",
+    "path",
+    "str",
+    "url",
 )
 
 T = t.TypeVar("T")
 
+#: List of environment variable values that will be converted into Python `True`
 BOOLEAN_TRUTHY_VALUES = ["true", "1", "y", "yes", "ok"]
+#: Default separator for list encoded values.
 LIST_SEPARATOR = ","
+
+ParseFunc = t.Callable[[builtins.str | T], T]
 
 
 class MissingFromEnv(InvalidConfig):
@@ -60,30 +65,68 @@ class MissingFromEnv(InvalidConfig):
 
 
 def get_raw(env_var_name: builtins.str) -> builtins.str:
-    try:
-        return os.environ[env_var_name]
-    except KeyError:
-        raise MissingFromEnv(f"Missing env var {env_var_name!r}")
+    """
+    Returns the value of the environment variable, or raises an error.
+    """
+    ret = os.getenv(env_var_name, None)
+
+    if ret is not None:
+        return ret
+
+    raise MissingFromEnv(f"Missing env var {env_var_name!r}")
 
 
-def get_raw_optional(env_var: builtins.str) -> t.Optional[builtins.str]:
+def get_raw_optional(env_var: builtins.str) -> builtins.str | None:
+    """
+    Returns the value of the environment variable, or `None` if it doesn't
+    exist.
+    """
     return os.getenv(env_var, None)
 
 
 class EnvVar(t.Generic[T]):
-    def __init__(self, parse_func: t.Callable[[t.Union[builtins.str, T]], T]):
+    parse_func: ParseFunc[T]
+
+    def __init__(self, parse_func: ParseFunc[T]):
         self.parse_func = parse_func
+
+    @t.overload
+    def default(
+        self,
+        env_var_name: builtins.str,
+    ) -> T: ...
+
+    @t.overload
+    def default(
+        self,
+        env_var_name: builtins.str,
+        default: Missing,
+    ) -> T: ...
+
+    @t.overload
+    def default(
+        self,
+        env_var_name: builtins.str,
+        default: T,
+    ) -> T: ...
+
+    @t.overload
+    def default(
+        self,
+        env_var_name: builtins.str,
+        default: builtins.str,
+    ) -> T: ...
 
     def default(
         self,
         env_var_name: builtins.str,
-        default: t.Union[Empty, builtins.str, T, t.List[T]] = MISSING,
-    ) -> t.Union[builtins.str, T, t.List[T]]:
+        default: Missing | builtins.str | T = MISSING,
+    ) -> builtins.str | T | t.List[T]:
         if default is MISSING:
             return get_raw(env_var_name)
 
         if t.TYPE_CHECKING:
-            assert not isinstance(default, Empty)
+            assert not isinstance(default, Missing)
 
         raw_value = get_raw_optional(env_var_name)
 
@@ -95,12 +138,12 @@ class EnvVar(t.Generic[T]):
     def __call__(
         self,
         env_var_name: builtins.str,
-        default: t.Union[Empty, builtins.str, T] = MISSING,
+        default: Missing | builtins.str | T = MISSING,
     ) -> T:
         raw_value = self.default(env_var_name, default)
 
         if t.TYPE_CHECKING:
-            assert not isinstance(raw_value, Empty)
+            assert not isinstance(raw_value, Missing)
             assert not isinstance(raw_value, list)
 
         return self.parse_func(raw_value)
@@ -116,16 +159,16 @@ class EnvVar(t.Generic[T]):
     def list(
         self,
         env_var_name: builtins.str,
-        default: t.Union[Empty, builtins.str, t.List[T]] = MISSING,
-        separator=LIST_SEPARATOR,
+        default: Missing | t.List[T] = MISSING,
+        separator: builtins.str = LIST_SEPARATOR,
     ) -> t.List[T]:
-        raw_value = self.default(env_var_name, default)
+        raw_value = self.default(env_var_name, t.cast(T, default))
 
         if isinstance(raw_value, list):
             return raw_value
 
         if t.TYPE_CHECKING:
-            assert not isinstance(raw_value, Empty)
+            assert not isinstance(raw_value, Missing)
             assert isinstance(raw_value, builtins.str)
 
         return [self.parse_func(item) for item in raw_value.split(separator)]
@@ -134,7 +177,7 @@ class EnvVar(t.Generic[T]):
         self,
         env_var_name: builtins.str,
         separator=LIST_SEPARATOR,
-    ) -> t.Optional[t.List[T]]:
+    ) -> t.List[T] | None:
         raw_value = get_raw_optional(env_var_name)
 
         if raw_value is None:
@@ -144,19 +187,26 @@ class EnvVar(t.Generic[T]):
 
 
 def parse_str(raw_value: builtins.str) -> builtins.str:
+    """
+    Parse an environment variable value as a string.
+    """
     return raw_value
 
 
-def parse_bool(
-    raw_value: t.Union[builtins.str, builtins.bool]
-) -> builtins.bool:
+def parse_bool(raw_value: builtins.str | builtins.bool) -> builtins.bool:
+    """
+    Parse an environment variable value as a boolean.
+    """
     if isinstance(raw_value, builtins.bool):
         return raw_value
 
     return raw_value.lower() in BOOLEAN_TRUTHY_VALUES
 
 
-def parse_int(raw_value: t.Union[builtins.str, builtins.int]) -> builtins.int:
+def parse_int(raw_value: builtins.str | builtins.int) -> builtins.int:
+    """
+    Parse an environment variable value as an integer.
+    """
     if isinstance(raw_value, builtins.int):
         return raw_value
 
@@ -166,9 +216,10 @@ def parse_int(raw_value: t.Union[builtins.str, builtins.int]) -> builtins.int:
         raise InvalidConfig(f"{raw_value!r} is not a valid integer")
 
 
-def parse_float(
-    raw_value: t.Union[builtins.str, builtins.float],
-) -> builtins.float:
+def parse_float(raw_value: builtins.str | builtins.float) -> builtins.float:
+    """
+    Parse an environment variable value as a float.
+    """
     try:
         return builtins.float(raw_value)
     except ValueError:

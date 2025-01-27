@@ -81,10 +81,12 @@ def test_list_separator(my_env):
     """
     os.environ["MY_VAR"] = "http://foo|http://bar"
 
-    assert env.url.list("MY_VAR", separator="|") == to_url([
-        "http://foo",
-        "http://bar",
-    ])
+    assert env.url.list("MY_VAR", separator="|") == to_url(
+        [
+            "http://foo",
+            "http://bar",
+        ]
+    )
 
 
 def test_list_optional(my_env):
@@ -93,10 +95,12 @@ def test_list_optional(my_env):
     """
     assert "URL_LIST" in os.environ
 
-    assert env.url.list_optional("URL_LIST") == to_url([
-        "http://foo",
-        "http://bar",
-    ])
+    assert env.url.list_optional("URL_LIST") == to_url(
+        [
+            "http://foo",
+            "http://bar",
+        ]
+    )
 
 
 def test_list_optional_missing():
@@ -114,10 +118,12 @@ def test_list_optional_separator(my_env):
     """
     os.environ["MY_VAR"] = "http://foo|http://bar"
 
-    assert env.url.list_optional("MY_VAR", separator="|") == to_url([
-        "http://foo",
-        "http://bar",
-    ])
+    assert env.url.list_optional("MY_VAR", separator="|") == to_url(
+        [
+            "http://foo",
+            "http://bar",
+        ]
+    )
 
 
 def test_str_protocol(my_env):
@@ -133,13 +139,11 @@ def test_str_protocol(my_env):
 
 
 @overload
-def to_url(value: List[str]) -> List[url.Url]:
-    ...
+def to_url(value: List[str]) -> List[url.Url]: ...
 
 
 @overload
-def to_url(value: str) -> url.Url:
-    ...
+def to_url(value: str) -> url.Url: ...
 
 
 def to_url(value):

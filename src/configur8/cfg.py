@@ -6,8 +6,6 @@ Python
 An example ``config.py`` file:
 
 ```python
-import typing as t
-
 from configur8 import cfg
 
 
@@ -26,14 +24,14 @@ class MySQLSocket:
     socket: str
 
 
-MySQL = t.Union[MySQLHost, MySQLSocket]
+MySQL = MySQLHost | MySQLSocket
 
 
 class Config:
     mysql: MySQL
 
 
-def load(path: Optional[str] = None) -> Config:
+def load(path: str | None = None) -> Config:
     return cfg.load(Config, path)
 ```
 """
@@ -42,7 +40,6 @@ import inspect
 import json
 import re
 import typing as t
-import typing_extensions as te
 
 import yaml
 
@@ -50,13 +47,13 @@ from configur8 import env, types
 
 
 Data = t.TypeVar("Data")
-PathLike = t.List[t.Union[str, int]]
+PathLike = t.List[str | int]
 DataValues = t.Dict[str, t.Any]
-SupportedFormats = te.Literal["yaml", "json"]
+SupportedFormats = t.Literal["yaml", "json"]
 
 
 class Path:
-    data: t.List[t.Union[str, int]]
+    data: t.List[str | int]
 
     match = re.compile(r"([a-zA-Z0-9_-]+)\.?|\[([0-9]+)\]\.?")
 
@@ -90,7 +87,7 @@ class Path:
 
     @staticmethod
     def decode(path: str) -> "Path":
-        ret: t.List[t.Union[str, int]] = []
+        ret: t.List[str | int] = []
 
         for s, i in Path.match.findall(path):
             if len(s) > 0:
@@ -122,7 +119,7 @@ class ConfigError(Exception):
 
     def __init__(
         self,
-        path: t.Union[PathLike, Path, str],
+        path: PathLike | Path | str,
         message: str,
     ) -> None:
         self.message = message
@@ -146,12 +143,12 @@ def into(  # noqa: C901
     data_dict = types.to_dict(data)
 
     ret = config()
-    path = (_path or [])
+    path = _path or []
 
-    def parse_value(
+    def parse_value(  # noqa: C901
         type_: t.Any,
         value: t.Any,
-        name: t.Union[str, int],
+        name: str | int,
     ) -> t.Any:
         new_path = path + [name]
 
@@ -249,8 +246,7 @@ def into(  # noqa: C901
             return parse_value(type_.__supertype__, value, name)
         else:
             raise ConfigError(
-                path,
-                f"Unexpected type {type_!r} for {name!r}, got {value!r}"
+                path, f"Unexpected type {type_!r} for {name!r}, got {value!r}"
             )
 
     annotations, default_values = types.get_annotation(config)
