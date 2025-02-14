@@ -318,3 +318,19 @@ new_bool: true
 
     assert ret.new_str == "foo"
     assert ret.new_bool is True
+
+
+def test_literal():
+    class TestConfig:
+        literal: t.Literal["foo", "bar"]
+
+    ret = cfg.parse(TestConfig, "literal: foo")
+
+    assert ret.literal == "foo"
+
+    with pytest.raises(cfg.ConfigError) as err:
+        cfg.parse(TestConfig, "literal: baz")
+
+    assert (
+        str(err.value) == "literal: Expected one of ('foo', 'bar'), got 'baz'"
+    )
