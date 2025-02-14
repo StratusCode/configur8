@@ -60,6 +60,16 @@ def is_new_type(type_: t.Any) -> bool:
     return False
 
 
+def is_literal_type(type_: t.Any) -> bool:
+    if hasattr(type_, "__origin__"):
+        type_ = type_.__origin__
+
+    if type_ is t.Literal:
+        return True
+
+    return False
+
+
 def get_annotation(
     config: t.Type,
 ) -> t.Tuple[

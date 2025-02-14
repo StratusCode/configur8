@@ -244,6 +244,14 @@ def into(  # noqa: C901
             return ret
         elif types.is_new_type(type_):
             return parse_value(type_.__supertype__, value, name)
+        elif types.is_literal_type(type_):
+            if value not in type_.__args__:
+                raise ConfigError(
+                    new_path,
+                    f"Expected one of {type_.__args__!r}, got {value!r}",
+                )
+
+            return value
         else:
             raise ConfigError(
                 path, f"Unexpected type {type_!r} for {name!r}, got {value!r}"
